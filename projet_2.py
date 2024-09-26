@@ -1,13 +1,33 @@
-from datetime import datetime
+from datetime import date, timedelta, datetime
 
 '''
+
+from datetime import datetime, timedelta
+
+# Exemple de chaîne de caractères représentant une date
+date_str = "2024-09-22"
+
+# Convertir la chaîne en objet datetime
+date_echeance = datetime.strptime(date_str, "%Y-%m-%d")
+
+# Obtenir la date actuelle
+maintenant = datetime.now()
+
+# Vérifier si la différence entre l'échéance et maintenant est inférieure à 36 heures
+duree_r
+if duree_restante.total_seconds() < 0:
+    print("La tâche est en retard !")
+else:
+    print(f"Il reste {duree_restante} avant l'échéance.")
+
+
 class Tache():
 	
 	def __init__(self, dico, titre=""):
 		if titre != "":
 			#crée un dictionnaire à partir du titre
 			dico = {
-				"creation" : datetime.now(),
+				"creation" : date.now().date().strftime("%d/%m/%Y"),,
 				"titre" : titre,
 				"contenu" : "",
 				"echeance" : None,
@@ -42,9 +62,10 @@ class Liste_des_taches():
 	def creer_tache(self, titre):
 		#crée un objet Tache
 		tache = {
-			"creation" : datetime.now(),
+			"creation" : date.now().date().strftime("%d/%m/%Y"),
 			"titre" : titre,
 			"contenu" : "",
+			"position" : len(self.data_liste) ,
 			"echeance" : None,
 			"statut" : "en cours"}
 		#ajoute la tache à la liste
@@ -66,22 +87,40 @@ class Liste_des_taches():
 		self.data_liste.pop(index)
 		
 	def classer(self):
-		#cree un nouveau dictionnaire où les taches sont classés en fonction de leurs statut
+		#met a jour le statu des taches
+		self.update_statu()
 		liste_classed = {}
-		'''
-		liste_classed = {tache["statut"] : liste_classed.get( tache["statut"], []) + [tache["titre"]] for tache in self.data_liste}
 		
-		
+		#classe les taches par statu 
 		for tache in self.data_liste:
 			statu = tache["statut"]
-			liste_classed[statu] = liste_classed.get(statu, [])
-			print(liste_classed[statu])
-			liste_classed[statu] = liste_classed[statu].extend(tache["titre"])
-			print(liste_classed)'''
-		liste_classed = {statut: [tache["titre"] for tache in self.data_liste if tache["statut"] == statut] for statut in set(t["statut"] for t in self.data_liste)}
-
-		return liste_classed
+			liste_classed[statu] = liste_classed.get(statu, []) + [tache["titre"]]		
+			
+		return liste_classed      
+	
+	def update_statu(self):
+		#met à jour le statu des listes
+			
+		for tache in self.data_liste:
+			date_echeance = datetime.strptime(tache["echeance"], "%d/%m/%Y")		
+			delai = date_echeance - datetime.now()
+				
+			#statu ==> urgent si echeance est moins de 36h
+			if tache["statut"] == "en cours" and delai <= timedelta(hours=36) :
+				tache["statut"] = "urgent"
+					
+			#statu ==> retard si echeance est depassée
+			if tache["statut"] == "urgent" and delai.total_seconds() < 0 :
+				tache["statut"] = "retard"
+			
+	def trier(self, liste, critera="creation"):
 		
+		def get_critera(element):
+			index = self.rechercher(element)
+			return self.data_liste[index][critera]
+			
+		#trie une liste en fonction du critere donné
+		return sorted(liste, key = get_critera)
 		
 	def afficher_liste(self):
 		#trie la liste en fonction de la date de creation 
@@ -90,28 +129,8 @@ class Liste_des_taches():
 		trie = sorted(liste, key= lambda e: e["creation"], reverse = True)
 		#parcours la liste triée et affiche les taches
 		for tache in trie:
-			print(f"	@ {tache['titre']}")
-		
+			print(f"	@ [{tache['position']}] {tache['titre']}")
 
-#-----------
+#----------------------------------------------------------
 #test zone
-exemple =[
-	{"creation" : None,
-		"titre" : "Faire du sport",
-		"contenu" : "",
-		"echeance" : None,
-		"statut" : "en cours"},
-	{"creation" : None,
-		"titre" : "Lire un livre",
-		"contenu" : "",
-		"echeance" : None,
-		"statut" : "achevé"},
-	{"creation" : None,
-		"titre" : "Planifier la semaine",
-		"contenu" : "",
-		"echeance" : None,
-		"statut" : "en cours"},
-]
 
-ex = Liste_des_taches(exemple)
-print(ex.classer())
